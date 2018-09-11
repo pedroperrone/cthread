@@ -17,16 +17,10 @@ BIN_DIR=./bin
 SRC_DIR=./src
 
 all: cthread.o
-	ar crs $(LIB_DIR)/libcthread.a $(BIN_DIR)/support.o $(BIN_DIR)/cthread.o
+	ar rcs $(LIB_DIR)/libcthread.a $(BIN_DIR)/cthread.o $(BIN_DIR)/support.o
 
-cthread.o: $(SRC_DIR)/cthread.c
-	$(CC) -c $(SRC_DIR)/cthread.c -Wall
-
-# regra2: #dependências para a regra2
-# 	$(CC) -o $(BIN_DIR)regra2 $(SRC_DIR)regra2.c -Wall
-
-# regran: #dependências para a regran
-# 	$(CC) -o $(BIN_DIR)regran $(SRC_DIR)regran.c -Wall
+cthread.o:
+	$(CC) -c -o $(BIN_DIR)/cthread.o $(SRC_DIR)/cthread.c -Wall
 
 clean:
 	rm -rf $(LIB_DIR)/*.a $(BIN_DIR)/*.o $(SRC_DIR)/*~ $(INC_DIR)/*~ *~

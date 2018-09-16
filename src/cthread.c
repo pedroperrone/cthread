@@ -1,13 +1,22 @@
-
 #include <stdio.h>
 #include <string.h>
 #include "../include/support.h"
 #include "../include/cthread.h"
 #include "../include/cdata.h"
+#include "../include/scheduler.h"
 
+int main_thread_exists = 0;
 
 int ccreate (void* (*start)(void*), void *arg, int prio) {
-	return -1;
+	if(!main_thread_exists) {
+		initialize_main_thread_and_queues();
+		main_thread_exists = 1;
+	}
+	if(start == NULL) return -1;
+
+	create_thread(start, arg, prio);
+	select_thread_and_execute();
+	return 0;
 }
 
 int csetprio(int tid, int prio) {

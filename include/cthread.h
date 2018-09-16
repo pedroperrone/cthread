@@ -11,6 +11,7 @@
 #define __cthread__
 
 #include "support.h"
+#include "scheduler.h"
 
 typedef struct s_sem {
 	int	count;	/* indica se recurso está ocupado ou não (livre > 0, ocupado = 0) */

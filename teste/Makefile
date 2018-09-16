@@ -13,19 +13,11 @@
 CC=gcc
 LIB_DIR=./lib
 INC_DIR=./include
-BIN_DIR=./bin
+BIN_DIR=../bin
 SRC_DIR=./src
 
-all: cthread.o scheduler.o
-	ar rcs $(LIB_DIR)/libcthread.a $(BIN_DIR)/cthread.o $(BIN_DIR)/scheduler.o $(BIN_DIR)/support.o
+all: cthread_test.o
+	$(CC) -o teste cthread_test.o $(BIN_DIR)/cthread.o $(BIN_DIR)/scheduler.o $(BIN_DIR)/support.o
 
-cthread.o:
-	$(CC) -c -o $(BIN_DIR)/cthread.o $(SRC_DIR)/cthread.c -Wall
-
-scheduler.o:
-	$(CC) -c -o $(BIN_DIR)/scheduler.o $(SRC_DIR)/scheduler.c -Wall
-
-# clean:
-# 	rm -rf $(LIB_DIR)/*.a $(BIN_DIR)/*.o $(SRC_DIR)/*~ $(INC_DIR)/*~ *~
-
-
+cthread_test.o: cthread_test.c
+	$(CC) -c cthread_test.c -Wall

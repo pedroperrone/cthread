@@ -6,6 +6,10 @@
 // 	Thread 3, with priority 1, starts.
 // 	Thread 3 ends.
 // 	Thread 2 ends.
+//	The execution came back to the main
+//	Even after returning to the main, you can create new threads.
+//	Expected error, thread with negative priority.
+//	Expected error, thread with priority too big.
 // 	I am the main thread. Now that all the created threads are finished, I execute again.
 
 #include <stdio.h>
@@ -14,13 +18,27 @@
 void thread_one();
 void thread_two();
 void thread_three();
+void extra_thread();
 
 int main() {
 	int thread_tcb;
 	printf("I am the main thread.\n");
 	thread_tcb = ccreate((void*) thread_one, NULL, 0);
 	if(thread_tcb == -1) {
-		printf("Error creating the new thread.\n");
+		printf("UNEXPECTED error creating the new thread.\n");
+	}
+	printf("The execution came back to the main.\n");
+	thread_tcb = ccreate((void*) extra_thread, NULL, 0);
+	if(thread_tcb == -1) {
+		printf("UNEXPECTED error creating the new thread.\n");
+	}
+	thread_tcb = ccreate((void*) extra_thread, NULL, -1);
+	if(thread_tcb == -1) {
+		printf("Expected error, thread with negative priority.\n");
+	}
+	thread_tcb = ccreate((void*) extra_thread, NULL, 3);
+	if(thread_tcb == -1) {
+		printf("Expected error, thread with priority too big.\n");
 	}
 	printf("I am the main thread. Now that all the created threads are finished, I execute again.\n");
 	return 0;
@@ -49,4 +67,8 @@ void thread_two() {
 void thread_three() {
 	printf("Thread 3, with priority 1, starts\n");
 	printf("Thread 3 ends.\n");
+}
+
+void extra_thread() {
+	printf("Even after returning to the main, you can create new threads.\n");
 }

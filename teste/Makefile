@@ -16,8 +16,14 @@ INC_DIR=./include
 BIN_DIR=../bin
 SRC_DIR=./src
 
-all: cthread_test.o
-	$(CC) -o teste cthread_test.o $(BIN_DIR)/cthread.o $(BIN_DIR)/scheduler.o $(BIN_DIR)/support.o
+all: cthread_test cyield_test
 
+cthread_test: cthread_test.o $(BIN_DIR)/cthread.o $(BIN_DIR)/scheduler.o
+	$(CC) -o teste cthread_test.o $(BIN_DIR)/cthread.o $(BIN_DIR)/scheduler.o $(BIN_DIR)/support.o -Wall
 cthread_test.o: cthread_test.c
 	$(CC) -c cthread_test.c -Wall
+
+cyield_test: cyield_test.o $(BIN_DIR)/cthread.o $(BIN_DIR)/scheduler.o
+	$(CC) -o cyield_test cyield_test.o $(BIN_DIR)/cthread.o $(BIN_DIR)/scheduler.o $(BIN_DIR)/support.o
+cyield_test.o: cyield_test.c
+	$(CC) -c cyield_test.c -Wall

@@ -6,6 +6,8 @@
 #include "../include/scheduler.h"
 
 #define STACK_SIZE 8192
+#define LOWEST_PRIORITY 2
+#define HIGHEST_PRIORITY 0
 
 PFILA2 ready = NULL, blocked = NULL, running = NULL;
 TCB_t main_thread;
@@ -15,6 +17,10 @@ void initialize_queue(PFILA2* fila) {
 	*fila = malloc(sizeof(PFILA2));
 	CreateFila2(*fila);
 	FirstFila2(*fila);
+}
+
+int priority_is_valid(int priority) {
+	return (priority >= HIGHEST_PRIORITY) && (priority <= LOWEST_PRIORITY);
 }
 
 void initialize_main_thread_and_queues() {
@@ -209,4 +215,11 @@ void yield() {
 void dispatch(TCB_t *current_thread, TCB_t* next_thread) {
 	swap_from_ready_and_running(next_thread, current_thread);
 	swapcontext(&(current_thread->context), &(next_thread->context));
+}
+
+int update_current_thread_priority(int priority) {
+	TCB_t *current_thread = select_thread_to_preempt();
+	if(current_thread == NULL) return -1;
+	current_thread->prio = priority;
+	return 0;
 }

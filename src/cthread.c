@@ -5,9 +5,6 @@
 #include "../include/cdata.h"
 #include "../include/scheduler.h"
 
-#define LOWEST_PRIORITY 2
-#define HIGHEST_PRIORITY 0
-
 int main_thread_exists = 0;
 
 int ccreate (void* (*start)(void*), void *arg, int prio) {
@@ -16,8 +13,7 @@ int ccreate (void* (*start)(void*), void *arg, int prio) {
 		main_thread_exists = 1;
 	}
 	if(start == NULL) return -1;
-	if(prio > LOWEST_PRIORITY) return -1;
-	if(prio < HIGHEST_PRIORITY) return -1;
+	if(!priority_is_valid(prio)) return -1;
 
 	create_thread(start, arg, prio);
 	schedule();
@@ -25,7 +21,14 @@ int ccreate (void* (*start)(void*), void *arg, int prio) {
 }
 
 int csetprio(int tid, int prio) {
-	return -1;
+	if(!main_thread_exists) {
+		initialize_main_thread_and_queues();
+		main_thread_exists = 1;
+	}
+	if(!priority_is_valid(prio)) return -1;
+	if(update_current_thread_priority(prio) == -1) return -1;
+	schedule();
+	return 0;
 }
 
 int cyield(void) {

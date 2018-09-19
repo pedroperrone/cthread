@@ -154,16 +154,15 @@ void schedule() {
 
 	running_thread = select_thread_to_preempt();
 	fittest_ready_thread = select_thread_to_run();
-
-	if(running_thread == NULL) {
+	if(fittest_ready_thread == NULL) return; // There are no more threads to execute
+	if(running_thread == NULL) { // Main thread is running
 		remove_thread_from_queue(ready, fittest_ready_thread->tid);
 		AppendFila2(running, fittest_ready_thread);
 		swapcontext(&(main_thread.context), &(fittest_ready_thread->context));
 		return;
 	}
 	if(running_thread->prio > fittest_ready_thread->prio) {
-		swap_from_ready_and_running(fittest_ready_thread, running_thread);
-		swapcontext(&(running_thread->context), &(fittest_ready_thread->context));
+		dispatch(running_thread, fittest_ready_thread);
 	}
 }
 
@@ -194,4 +193,20 @@ void swap_from_ready_and_running(TCB_t* ready_thread, TCB_t* running_thread) {
 	remove_thread_from_queue(running, running_thread->tid);
 	AppendFila2(ready, running_thread);
 	AppendFila2(running, ready_thread);
+}
+
+void yield() {
+	TCB_t *running_thread, *next_thread;
+	running_thread = select_thread_to_preempt();
+	if(running_thread == NULL) return; // Main thread is running
+	next_thread = select_thread_to_run();
+	if(next_thread == NULL) return; // There are no more threads to run
+	if(next_thread->prio <= running_thread->prio) {
+		dispatch(running_thread, next_thread);
+	}
+}
+
+void dispatch(TCB_t *current_thread, TCB_t* next_thread) {
+	swap_from_ready_and_running(next_thread, current_thread);
+	swapcontext(&(current_thread->context), &(next_thread->context));
 }

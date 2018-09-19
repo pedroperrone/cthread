@@ -20,5 +20,7 @@ TCB_t* select_thread_to_preempt();
 void print_fila(PFILA2 fila);
 void print_ready();
 void print_running();
+void yield();
+void dispatch();
 
 #endif

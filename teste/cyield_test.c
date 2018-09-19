@@ -19,6 +19,7 @@ void thread_three();
 
 int main() {
 	int thread_tcb;
+	cyield();
 	printf("yield in the main should not cause errors.\n");
 	thread_tcb = ccreate((void*) thread_one, NULL, 0);
 	if(thread_tcb == -1) {

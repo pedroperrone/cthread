@@ -22,5 +22,7 @@ void print_ready();
 void print_running();
 void yield();
 void dispatch();
+int priority_is_valid(int priority);
+int update_current_thread_priority(int priority);
 
 #endif

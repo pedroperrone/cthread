@@ -16,6 +16,7 @@ void threat_end_of_thread();
 int next_tid();
 int thread_is_in_queue(PFILA2 queue, int tid);
 TCB_t* select_thread_to_run();
+TCB_t* select_thread_by_priority_on(PFILA2 queue);
 TCB_t* find_by_tid(PFILA2 queue, int tid);
 int is_empty(PFILA2 queue);
 void schedule();

@@ -10,7 +10,6 @@
 #define HIGHEST_PRIORITY 0
 
 PFILA2 ready = NULL, blocked = NULL, running = NULL, joins = NULL;
-TCB_t main_thread;
 int tid_sequence = 0;
 
 void initialize_queue(PFILA2* fila) {
@@ -25,40 +24,32 @@ int priority_is_valid(int priority) {
 
 void initialize_main_thread_and_queues() {
 	PFILA2* queues_of_states[] = {&ready, &blocked, &running, &joins};
+	TCB_t *main_thread = malloc(sizeof(TCB_t));
 	int i;
-	main_thread.tid = 0;
-	main_thread.prio = 2;
-	getcontext(&(main_thread.context));
+	main_thread->tid = 0;
+	main_thread->prio = 2;
 
 	for(i = 0; i <= 3; i++) {
 		initialize_queue(queues_of_states[i]);
 	}
+
+	AppendFila2(running, main_thread);
+	initialize_context(&(main_thread->context), NULL);
 }
 
 int create_thread(void* (*start)(void*), void *arg, int prio) {
-	char *end_thread_function_stack;
-	ucontext_t *end_thread_function_context;
+	ucontext_t *end_thread_function_context = malloc(sizeof(ucontext_t));
 	TCB_t *thread;
-
-	// Create a context for the end thread function
-	end_thread_function_stack = malloc(STACK_SIZE);
-	end_thread_function_context = malloc(sizeof(ucontext_t));
-	getcontext(end_thread_function_context);
-	end_thread_function_context->uc_stack.ss_size = STACK_SIZE;
-	end_thread_function_context->uc_stack.ss_sp = end_thread_function_stack;
-	end_thread_function_context->uc_link = NULL;
-	makecontext(end_thread_function_context, threat_end_of_thread, 0);
-
 	// Set the thread attributes
 	thread = malloc(sizeof(TCB_t));
 	thread->tid = next_tid();
 	// TODO: deal with state
 	thread->state = 1;
 	thread->prio = prio;
-	getcontext(&(thread->context));
-	thread->context.uc_stack.ss_size = STACK_SIZE;
-	thread->context.uc_stack.ss_sp = malloc(STACK_SIZE);
-	thread->context.uc_link = end_thread_function_context;
+
+	initialize_context(end_thread_function_context, NULL);
+	initialize_context(&(thread->context), end_thread_function_context);
+	makecontext(end_thread_function_context, threat_end_of_thread, 0);
 	makecontext(&(thread->context), (void(*)(void))start, 1, arg);
 
 	// Add the created thread to the ready list
@@ -66,18 +57,24 @@ int create_thread(void* (*start)(void*), void *arg, int prio) {
 	return thread->tid;
 }
 
+void initialize_context(ucontext_t* cont, ucontext_t* following) {
+	char *stack;
+	getcontext(cont);
+	stack = malloc(STACK_SIZE);
+	cont->uc_stack.ss_size = STACK_SIZE;
+	cont->uc_stack.ss_sp = stack;
+	cont->uc_link = following;
+}
+
 void threat_end_of_thread() {
 	TCB_t *next_thread;
 	TCB_t *current_thread = select_thread_to_preempt();
 	free_blocked_thread(current_thread->tid);
 	next_thread = select_thread_to_run();
+	remove_thread_from_queue(running, current_thread->tid);
 	free(current_thread);
-	FirstFila2(running);
-	DeleteAtIteratorFila2(running);
 
-	if(next_thread == NULL) {
-		setcontext(&(main_thread.context));
-	} else {
+	if(next_thread != NULL) {
 		remove_thread_from_queue(ready, next_thread->tid);
 		AppendFila2(running, next_thread);
 		setcontext(&(next_thread->context));
@@ -99,14 +96,14 @@ void print_fila(PFILA2 fila) {
 	printf("ACABOU O PRINT DA FILA\n");
 }
 
-// Find the first element with highest priority, removes it from the list and return a pointer to it.
+// Find the first element with highest priority and return a pointer to it.
 TCB_t* select_thread_to_run() {
 	int priority;
 	TCB_t* thread;
 	if(FirstFila2(ready) != 0) { // If the queue is empty
 		return NULL;
 	}
-	for(priority = 0; priority <= 2; priority++) {
+	for(priority = HIGHEST_PRIORITY; priority <= LOWEST_PRIORITY; priority++) {
 		do {
 			thread = GetAtIteratorFila2(ready);
 			if(thread->prio == priority) {
@@ -163,12 +160,6 @@ void schedule() {
 	running_thread = select_thread_to_preempt();
 	fittest_ready_thread = select_thread_to_run();
 	if(fittest_ready_thread == NULL) return; // There are no more threads to execute
-	if(running_thread == NULL) { // Main thread is running
-		remove_thread_from_queue(ready, fittest_ready_thread->tid);
-		AppendFila2(running, fittest_ready_thread);
-		swapcontext(&(main_thread.context), &(fittest_ready_thread->context));
-		return;
-	}
 	if(running_thread->prio > fittest_ready_thread->prio) {
 		dispatch(running_thread, fittest_ready_thread);
 	}
@@ -206,7 +197,6 @@ void swap_from_ready_and_running(TCB_t* ready_thread, TCB_t* running_thread) {
 void yield() {
 	TCB_t *running_thread, *next_thread;
 	running_thread = select_thread_to_preempt();
-	if(running_thread == NULL) return; // Main thread is running
 	next_thread = select_thread_to_run();
 	if(next_thread == NULL) return; // There are no more threads to run
 	if(next_thread->prio <= running_thread->prio) {
@@ -256,16 +246,14 @@ int join(int tid) {
 	TCB_t *next_thread, *current_thread;
 	JOIN_t *join = malloc(sizeof(JOIN_t));
 	current_thread = select_thread_to_preempt();
-	if(current_thread == NULL) return -1;
 	next_thread = select_thread_to_run();
 	if(next_thread == NULL) return -1; // All threads are blocked
 	change_thread_queue(running, blocked, current_thread->tid);
+	change_thread_queue(ready, running, next_thread->tid);
 	join->waiting_tid = current_thread->tid;
 	join->waited_tid = tid;
 	AppendFila2(joins, join);
-	change_thread_queue(ready, running, next_thread->tid);
 	swapcontext(&(current_thread->context), &(next_thread->context));
-	// dispatch(current_thread, next_thread);
 	return 0;
 }
 

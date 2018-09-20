@@ -49,7 +49,7 @@ int cjoin(int tid) {
 	if(thread_waiting_for(tid) != -1) return -1;
 	if(!thread_exists(tid)) return -1;
 	join(tid);
-	return -1;
+	return 0;
 }
 
 int csem_init(csem_t *sem, int count) {

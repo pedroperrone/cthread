@@ -14,6 +14,7 @@
 void thread_one();
 void thread_two();
 void thread_three();
+void thread_four();
 
 int main() {
 	int thread_tcb;

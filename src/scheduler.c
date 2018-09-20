@@ -98,19 +98,24 @@ void print_fila(PFILA2 fila) {
 
 // Find the first element with highest priority and return a pointer to it.
 TCB_t* select_thread_to_run() {
+	return select_thread_by_priority_on(ready);
+}
+
+// Find the first element with highest priority and return a pointer to it.
+TCB_t* select_thread_by_priority_on(PFILA2 queue) {
 	int priority;
 	TCB_t* thread;
-	if(FirstFila2(ready) != 0) { // If the queue is empty
+	if(FirstFila2(queue) != 0) { // If the queue is empty
 		return NULL;
 	}
 	for(priority = HIGHEST_PRIORITY; priority <= LOWEST_PRIORITY; priority++) {
 		do {
-			thread = GetAtIteratorFila2(ready);
+			thread = GetAtIteratorFila2(queue);
 			if(thread->prio == priority) {
 				return thread;
 			}
-		} while(NextFila2(ready) == 0);
-		FirstFila2(ready);
+		} while(NextFila2(queue) == 0);
+		FirstFila2(queue);
 	}
 	return NULL;
 }

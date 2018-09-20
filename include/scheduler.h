@@ -34,5 +34,6 @@ int thread_waiting_for(int waited_tid);
 int thread_exists(int tid);
 int join(int tid);
 void free_blocked_thread(int waited_tid);
+void initialize_context(ucontext_t *cont, ucontext_t *following);
 
 #endif

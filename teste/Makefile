@@ -16,7 +16,7 @@ INC_DIR=./include
 BIN_DIR=../bin
 SRC_DIR=./src
 
-all: cthread_test cyield_test csetprio_test
+all: cthread_test cyield_test csetprio_test cjoin_test
 
 cthread_test: cthread_test.o $(BIN_DIR)/cthread.o $(BIN_DIR)/scheduler.o
 	$(CC) -o teste cthread_test.o $(BIN_DIR)/cthread.o $(BIN_DIR)/scheduler.o $(BIN_DIR)/support.o -Wall
@@ -32,3 +32,8 @@ csetprio_test: csetprio_test.o $(BIN_DIR)/cthread.o $(BIN_DIR)/scheduler.o
 	$(CC) -o csetprio_test csetprio_test.o $(BIN_DIR)/cthread.o $(BIN_DIR)/scheduler.o $(BIN_DIR)/support.o
 csetprio_test.o: csetprio_test.c
 	$(CC) -c csetprio_test.c -Wall
+
+cjoin_test: cjoin_test.o $(BIN_DIR)/cthread.o $(BIN_DIR)/scheduler.o
+	$(CC) -o cjoin_test cjoin_test.o $(BIN_DIR)/cthread.o $(BIN_DIR)/scheduler.o $(BIN_DIR)/support.o
+cjoin_test.o: cjoin_test.c
+	$(CC) -c cjoin_test.c -Wall

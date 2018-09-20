@@ -4,9 +4,14 @@
 #include <stdlib.h>
 #include "cdata.h"
 
+typedef struct s_JOIN {
+	int waiting_tid;
+	int waited_tid;
+} JOIN_t;
+
 void initialize_queue(PFILA2* fila);
 void initialize_main_thread_and_queues();
-void create_thread(void* (*start)(void*), void *arg, int prio);
+int create_thread(void* (*start)(void*), void *arg, int prio);
 void threat_end_of_thread();
 int next_tid();
 int thread_is_in_queue(PFILA2 queue, int tid);
@@ -24,5 +29,10 @@ void yield();
 void dispatch();
 int priority_is_valid(int priority);
 int update_current_thread_priority(int priority);
+void change_thread_queue(PFILA2 origin, PFILA2 destiny, int tid);
+int thread_waiting_for(int waited_tid);
+int thread_exists(int tid);
+int join(int tid);
+void free_blocked_thread(int waited_tid);
 
 #endif

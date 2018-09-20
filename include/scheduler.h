@@ -20,13 +20,13 @@ TCB_t* find_by_tid(PFILA2 queue, int tid);
 int is_empty(PFILA2 queue);
 void schedule();
 void remove_thread_from_queue(PFILA2 queue, int tid);
-void swap_from_ready_and_running(TCB_t* ready_thread, TCB_t* running_thread);
 TCB_t* select_thread_to_preempt();
 void print_fila(PFILA2 fila);
 void print_ready();
 void print_running();
 void yield();
-void dispatch();
+void dispatch(PFILA2 current_thread_destiny, TCB_t *current_thread,
+			  TCB_t *next_thread);
 int priority_is_valid(int priority);
 int update_current_thread_priority(int priority);
 void change_thread_queue(PFILA2 origin, PFILA2 destiny, int tid);

@@ -9,7 +9,7 @@
 #define LOWEST_PRIORITY 2
 #define HIGHEST_PRIORITY 0
 
-PFILA2 ready = NULL, blocked = NULL, running = NULL;
+PFILA2 ready = NULL, blocked = NULL, running = NULL, joins = NULL;
 TCB_t main_thread;
 int tid_sequence = 0;
 
@@ -24,18 +24,18 @@ int priority_is_valid(int priority) {
 }
 
 void initialize_main_thread_and_queues() {
-	PFILA2* queues_of_states[] = {&ready, &blocked, &running};
+	PFILA2* queues_of_states[] = {&ready, &blocked, &running, &joins};
 	int i;
 	main_thread.tid = 0;
 	main_thread.prio = 2;
 	getcontext(&(main_thread.context));
 
-	for(i = 0; i <= 2; i++) {
+	for(i = 0; i <= 3; i++) {
 		initialize_queue(queues_of_states[i]);
 	}
 }
 
-void create_thread(void* (*start)(void*), void *arg, int prio) {
+int create_thread(void* (*start)(void*), void *arg, int prio) {
 	char *end_thread_function_stack;
 	ucontext_t *end_thread_function_context;
 	TCB_t *thread;
@@ -63,13 +63,15 @@ void create_thread(void* (*start)(void*), void *arg, int prio) {
 
 	// Add the created thread to the ready list
 	AppendFila2(ready, (void*) thread);
+	return thread->tid;
 }
 
 void threat_end_of_thread() {
-	TCB_t *next_thread = select_thread_to_run();
+	TCB_t *next_thread;
 	TCB_t *current_thread = select_thread_to_preempt();
+	free_blocked_thread(current_thread->tid);
+	next_thread = select_thread_to_run();
 	free(current_thread);
-
 	FirstFila2(running);
 	DeleteAtIteratorFila2(running);
 
@@ -222,4 +224,57 @@ int update_current_thread_priority(int priority) {
 	if(current_thread == NULL) return -1;
 	current_thread->prio = priority;
 	return 0;
+}
+
+void change_thread_queue(PFILA2 origin, PFILA2 destiny, int tid) {
+	TCB_t *thread;
+	if(!thread_is_in_queue(origin, tid)) return;
+	thread = find_by_tid(origin, tid);
+	remove_thread_from_queue(origin, tid);
+	AppendFila2(destiny, thread);
+}
+
+int thread_waiting_for(int waited_tid) {
+	JOIN_t* join;
+	if(FirstFila2(joins) != 0) {
+		return -1;
+	}
+	do {
+		join = (JOIN_t*) GetAtIteratorFila2(joins);
+		if(join->waited_tid == waited_tid) {
+			return join->waiting_tid;
+		}
+	} while(NextFila2(joins) == 0);
+	return -1;
+}
+
+int thread_exists(int tid) {
+	return thread_is_in_queue(ready, tid) || thread_is_in_queue(blocked, tid);
+}
+
+int join(int tid) {
+	TCB_t *next_thread, *current_thread;
+	JOIN_t *join = malloc(sizeof(JOIN_t));
+	current_thread = select_thread_to_preempt();
+	if(current_thread == NULL) return -1;
+	next_thread = select_thread_to_run();
+	if(next_thread == NULL) return -1; // All threads are blocked
+	change_thread_queue(running, blocked, current_thread->tid);
+	join->waiting_tid = current_thread->tid;
+	join->waited_tid = tid;
+	AppendFila2(joins, join);
+	change_thread_queue(ready, running, next_thread->tid);
+	swapcontext(&(current_thread->context), &(next_thread->context));
+	// dispatch(current_thread, next_thread);
+	return 0;
+}
+
+void free_blocked_thread(int waited_tid) {
+	int tid = thread_waiting_for(waited_tid);
+	JOIN_t *join;
+	if(tid == -1) return;
+	change_thread_queue(blocked, ready, tid);
+	join = GetAtIteratorFila2(joins);
+	DeleteAtIteratorFila2(joins);
+	free(join);
 }

@@ -8,6 +8,7 @@
 int main_thread_exists = 0;
 
 int ccreate (void* (*start)(void*), void *arg, int prio) {
+	int tid;
 	if(!main_thread_exists) {
 		initialize_main_thread_and_queues();
 		main_thread_exists = 1;
@@ -15,9 +16,9 @@ int ccreate (void* (*start)(void*), void *arg, int prio) {
 	if(start == NULL) return -1;
 	if(!priority_is_valid(prio)) return -1;
 
-	create_thread(start, arg, prio);
+	tid = create_thread(start, arg, prio);
 	schedule();
-	return 0;
+	return tid;
 }
 
 int csetprio(int tid, int prio) {
@@ -41,6 +42,13 @@ int cyield(void) {
 }
 
 int cjoin(int tid) {
+	if(!main_thread_exists) {
+		initialize_main_thread_and_queues();
+		main_thread_exists = 1;
+	}
+	if(thread_waiting_for(tid) != -1) return -1;
+	if(!thread_exists(tid)) return -1;
+	join(tid);
 	return -1;
 }
 

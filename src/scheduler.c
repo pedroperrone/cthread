@@ -161,7 +161,7 @@ void schedule() {
 	fittest_ready_thread = select_thread_to_run();
 	if(fittest_ready_thread == NULL) return; // There are no more threads to execute
 	if(running_thread->prio > fittest_ready_thread->prio) {
-		dispatch(running_thread, fittest_ready_thread);
+		dispatch(ready, running_thread, fittest_ready_thread);
 	}
 }
 
@@ -181,31 +181,21 @@ void remove_thread_from_queue(PFILA2 queue, int tid) {
 	DeleteAtIteratorFila2(queue);
 }
 
-void swap_from_ready_and_running(TCB_t* ready_thread, TCB_t* running_thread) {
-	if(!thread_is_in_queue(ready, ready_thread->tid)) {
-		return;
-	}
-	if(!thread_is_in_queue(running, running_thread->tid)) {
-		return;
-	}
-	remove_thread_from_queue(ready, ready_thread->tid);
-	remove_thread_from_queue(running, running_thread->tid);
-	AppendFila2(ready, running_thread);
-	AppendFila2(running, ready_thread);
-}
-
 void yield() {
 	TCB_t *running_thread, *next_thread;
 	running_thread = select_thread_to_preempt();
 	next_thread = select_thread_to_run();
 	if(next_thread == NULL) return; // There are no more threads to run
 	if(next_thread->prio <= running_thread->prio) {
-		dispatch(running_thread, next_thread);
+		dispatch(ready, running_thread, next_thread);
 	}
 }
 
-void dispatch(TCB_t *current_thread, TCB_t* next_thread) {
-	swap_from_ready_and_running(next_thread, current_thread);
+void dispatch(PFILA2 current_thread_destiny,
+			  TCB_t *current_thread, TCB_t* next_thread) {
+	change_thread_queue(ready, running, next_thread->tid);
+	change_thread_queue(running, current_thread_destiny,
+						current_thread->tid);
 	swapcontext(&(current_thread->context), &(next_thread->context));
 }
 
@@ -243,17 +233,13 @@ int thread_exists(int tid) {
 }
 
 int join(int tid) {
-	TCB_t *next_thread, *current_thread;
+	TCB_t *next_thread = select_thread_to_run(),
+		  *current_thread = select_thread_to_preempt();
 	JOIN_t *join = malloc(sizeof(JOIN_t));
-	current_thread = select_thread_to_preempt();
-	next_thread = select_thread_to_run();
-	if(next_thread == NULL) return -1; // All threads are blocked
-	change_thread_queue(running, blocked, current_thread->tid);
-	change_thread_queue(ready, running, next_thread->tid);
 	join->waiting_tid = current_thread->tid;
 	join->waited_tid = tid;
 	AppendFila2(joins, join);
-	swapcontext(&(current_thread->context), &(next_thread->context));
+	dispatch(blocked, current_thread, next_thread);
 	return 0;
 }
 

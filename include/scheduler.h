@@ -3,6 +3,7 @@
 
 #include <stdlib.h>
 #include "cdata.h"
+#include "cthread.h"
 
 typedef struct s_JOIN {
 	int waiting_tid;
@@ -36,5 +37,8 @@ int thread_exists(int tid);
 int join(int tid);
 void free_blocked_thread(int waited_tid);
 void initialize_context(ucontext_t *cont, ucontext_t *following);
+int sem_init(csem_t *sem, int count);
+int c_wait(csem_t *sem);
+int c_signal(csem_t *sem);
 
 #endif

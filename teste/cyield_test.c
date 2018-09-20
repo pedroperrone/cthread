@@ -38,15 +38,6 @@ void thread_one() {
 	}
 	printf("This is thread 1 endind. It should execute only after \
 main's second yield.\n");
-	// printf("Thread 2, with priority 0, created. Thread 1 yields.\n");
-	// if(cyield() == -1) {
-	// 	printf("UNEXPECTED error yielding.\n");
-	// }
-	// if(cyield() == -1) {
-	// 	printf("UNEXPECTED error yielding.\n");
-	// }
-	// printf("Thread 1 yield again.\n");
-	// printf("I am the thread 1. I am endind and should be the second to end.\n");
 }
 
 void thread_two() {

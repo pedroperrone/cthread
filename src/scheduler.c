@@ -163,17 +163,6 @@ void schedule() {
 	if(running_thread->prio > fittest_ready_thread->prio) {
 		dispatch(running_thread, fittest_ready_thread);
 	}
-
-
-	// if(running_thread == NULL) { // Main thread is running
-	// 	remove_thread_from_queue(ready, fittest_ready_thread->tid);
-	// 	AppendFila2(running, fittest_ready_thread);
-	// 	swapcontext(&(main_thread.context), &(fittest_ready_thread->context));
-	// 	return;
-	// }
-	// if(running_thread->prio > fittest_ready_thread->prio) {
-	// 	dispatch(running_thread, fittest_ready_thread);
-	// }
 }
 
 TCB_t* select_thread_to_preempt() {
@@ -208,7 +197,6 @@ void swap_from_ready_and_running(TCB_t* ready_thread, TCB_t* running_thread) {
 void yield() {
 	TCB_t *running_thread, *next_thread;
 	running_thread = select_thread_to_preempt();
-	if(running_thread == NULL) return; // Main thread is running
 	next_thread = select_thread_to_run();
 	if(next_thread == NULL) return; // There are no more threads to run
 	if(next_thread->prio <= running_thread->prio) {
@@ -258,16 +246,14 @@ int join(int tid) {
 	TCB_t *next_thread, *current_thread;
 	JOIN_t *join = malloc(sizeof(JOIN_t));
 	current_thread = select_thread_to_preempt();
-	if(current_thread == NULL) return -1;
 	next_thread = select_thread_to_run();
 	if(next_thread == NULL) return -1; // All threads are blocked
 	change_thread_queue(running, blocked, current_thread->tid);
+	change_thread_queue(ready, running, next_thread->tid);
 	join->waiting_tid = current_thread->tid;
 	join->waited_tid = tid;
 	AppendFila2(joins, join);
-	change_thread_queue(ready, running, next_thread->tid);
 	swapcontext(&(current_thread->context), &(next_thread->context));
-	// dispatch(current_thread, next_thread);
 	return 0;
 }
 

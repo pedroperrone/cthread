@@ -18,11 +18,6 @@ void thread_four();
 
 int main() {
 	int thread_tcb;
-	// if(csetprio(0, 1) == -1) {
-	// 	printf("As expected, main thread can't set prio.\n");
-	// } else {
-	// 	printf("ERROR: main thread shouldn't be able to set prio.\n");
-	// }
 	thread_tcb = ccreate((void*) thread_one, NULL, 0);
 	if(thread_tcb == -1) {
 		printf("UNEXPECTED error creating thread.\n");

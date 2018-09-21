@@ -52,7 +52,6 @@ int cjoin(int tid) {
 }
 
 int csem_init(csem_t *sem, int count) {
-	//sem = malloc(sizeof(csem_t));
 	if(!main_thread_exists) {
 		initialize_main_thread_and_queues();
 		main_thread_exists = 1;

@@ -25,7 +25,7 @@ cthread.o:
 scheduler.o:
 	$(CC) -c -o $(BIN_DIR)/scheduler.o $(SRC_DIR)/scheduler.c -Wall
 
-# clean:
-# 	rm -rf $(LIB_DIR)/*.a $(BIN_DIR)/*.o $(SRC_DIR)/*~ $(INC_DIR)/*~ *~
+clean:
+	rm $(BIN_DIR)/scheduler.o $(BIN_DIR)/cthread.o
 
 

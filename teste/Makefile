@@ -16,7 +16,7 @@ INC_DIR=./include
 BIN_DIR=../bin
 SRC_DIR=./src
 
-all: cthread_test cyield_test csetprio_test cjoin_test quicksort
+all: cthread_test cyield_test csetprio_test cjoin_test sem_test quicksort
 
 cthread_test: cthread_test.o $(BIN_DIR)/cthread.o $(BIN_DIR)/scheduler.o
 	$(CC) -o teste cthread_test.o $(BIN_DIR)/cthread.o $(BIN_DIR)/scheduler.o $(BIN_DIR)/support.o -Wall
@@ -42,3 +42,9 @@ quicksort: quicksort.o $(BIN_DIR)/cthread.o $(BIN_DIR)/scheduler.o
 	$(CC) -o quicksort quicksort.o $(BIN_DIR)/cthread.o $(BIN_DIR)/scheduler.o $(BIN_DIR)/support.o
 quicksort.o: quicksort.c
 	$(CC) -c quicksort.c -Wall
+
+sem_test: sem_test.o $(BIN_DIR)/cthread.o $(BIN_DIR)/scheduler.o
+	$(CC) -o sem_test sem_test.o $(BIN_DIR)/cthread.o $(BIN_DIR)/scheduler.o $(BIN_DIR)/support.o
+sem_test.o: sem_test.c
+	$(CC) -c sem_test.c -Wall
+

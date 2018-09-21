@@ -144,7 +144,7 @@ TCB_t* find_by_tid(PFILA2 queue, int tid) {
 }
 
 int is_empty(PFILA2 queue) {
-	return !FirstFila2(queue);
+	return FirstFila2(queue);
 }
 
 
@@ -256,4 +256,40 @@ void free_blocked_thread(int waited_tid) {
 	join = GetAtIteratorFila2(joins);
 	DeleteAtIteratorFila2(joins);
 	free(join);
+}
+
+int sem_init(csem_t *sem, int count) {
+	sem->count = count;
+	initialize_queue(&sem->fila);
+	return 0;
+}
+
+int c_wait(csem_t *sem) {
+	TCB_t *running_thread, *next_thread;
+
+	if (sem->count == 0) { // If there are no resources available
+		running_thread = select_thread_to_preempt();
+		next_thread = select_thread_to_run();
+		AppendFila2(sem->fila, running_thread);
+		dispatch(blocked, running_thread, next_thread);
+		return 0;
+	} else {
+		sem->count--;
+		return 0;
+	}
+}
+
+int c_signal(csem_t *sem) {
+	TCB_t *fittest_sem_thread;
+
+	if (is_empty(sem->fila)) {
+		sem->count++;
+		return 0;
+	} else {
+		fittest_sem_thread = select_thread_by_priority_on(sem->fila);
+		remove_thread_from_queue(sem->fila, fittest_sem_thread->tid);
+		change_thread_queue(blocked, ready, fittest_sem_thread->tid);
+		schedule();
+		return 0;
+	}
 }

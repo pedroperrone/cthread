@@ -52,15 +52,19 @@ int cjoin(int tid) {
 }
 
 int csem_init(csem_t *sem, int count) {
-	return -1;
+	if(!main_thread_exists) {
+		initialize_main_thread_and_queues();
+		main_thread_exists = 1;
+	}
+	return sem_init(sem, count);
 }
 
 int cwait(csem_t *sem) {
-	return -1;
+	return c_wait(sem);
 }
 
 int csignal(csem_t *sem) {
-	return -1;
+	return c_signal(sem);
 }
 
 int cidentify (char *name, int size) {

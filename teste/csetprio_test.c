@@ -1,12 +1,12 @@
 // Expected output:
-// Thread 1, with priority 0, starts.
-// Thread 1 sets prio to 1.
-// Thread 2, with priority 0, starts.
-// Thread 2 ends.
-// Thread 3, with priority 0, starts.
-// Thread 3 sets prio to 1
-// Thread 3 should end before thread 1. Thread 3 ends.
-// Thread 1 ends.
+	// 1: Thread 1, with priority 0, starts.
+	// 2: Thread 1 sets prio to 1.
+	// 3: Thread 2, with priority 0, starts.
+	// 4: Thread 2 ends.
+	// 5: Thread 3, with priority 0, starts.
+	// 6: Thread 3 sets prio to 1
+	// 7: Thread 3 should end before thread 1. Thread 3 ends.
+	// 8: Thread 1 ends.
 
 #include <stdio.h>
 #include "../include/cthread.h"
@@ -28,32 +28,32 @@ int main() {
 }
 
 void thread_one() {
-	printf("Thread 1, with priority 0, starts.\n");
+	printf("1: Thread 1, with priority 0, starts.\n");
 	if(ccreate((void*) thread_two, NULL, 0) == -1) {
 		printf("UNEXPECTED error creating thread.\n");
 	}
 	if(ccreate((void*) thread_three, NULL, 0) == -1) {
 		printf("UNEXPECTED error creating thread.\n");
 	}
-	printf("Thread 1 sets prio to 1.\n");
+	printf("2: Thread 1 sets prio to 1.\n");
 	if(csetprio(0, 1) == -1) {
 		printf("UNEXPECTED error setting prio.\n");
 	}
-	printf("Thread 1 ends.\n");
+	printf("8: Thread 1 ends.\n");
 }
 
 void thread_two() {
-	printf("Thread 2, with priority 0, starts.\n");
-	printf("Thread 2 ends.\n");
+	printf("3: Thread 2, with priority 0, starts.\n");
+	printf("4: Thread 2 ends.\n");
 }
 
 void  thread_three() {
-	printf("Thread 3, with priority 0, starts.\n");
-	printf("Thread 3 sets prio to 1\n");
+	printf("5: Thread 3, with priority 0, starts.\n");
+	printf("6: Thread 3 sets prio to 1\n");
 	if(csetprio(0, 1) == -1) {
 		printf("UNEXPECTED error setting prio.\n");
 	}
-	printf("Thread 3 should end before thread 1. Thread 3 ends.\n");
+	printf("7: Thread 3 should end before thread 1. Thread 3 ends.\n");
 }
 
 void thread_four() {

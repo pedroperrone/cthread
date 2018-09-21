@@ -1,3 +1,6 @@
+// Expected output:
+    // The listed printed should be sorted
+
 #include <stdio.h>
 #include "../include/cthread.h"
 

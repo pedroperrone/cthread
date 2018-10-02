@@ -68,7 +68,12 @@ int csignal(csem_t *sem) {
 }
 
 int cidentify (char *name, int size) {
-	strncpy (name, "Sergio Cechin - 2017/1 - Teste de compilacao.", size);
+	char names[] = "Bruno Santana Massena de Lima - 274711\nPedro Salgado Perrone - 274696";
+	if(size < strlen(names)) {
+		printf("ERROR: the given size for the names is not big enough.\n");
+		return -1;
+	}
+	strncpy (name, names, size);
 	return 0;
 }
 

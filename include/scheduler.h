@@ -23,9 +23,6 @@ int is_empty(PFILA2 queue);
 void schedule();
 void remove_thread_from_queue(PFILA2 queue, int tid);
 TCB_t* select_thread_to_preempt();
-void print_fila(PFILA2 fila);
-void print_ready();
-void print_running();
 void yield();
 void dispatch(PFILA2 current_thread_destiny, TCB_t *current_thread,
 			  TCB_t *next_thread);

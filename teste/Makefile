@@ -2,7 +2,7 @@ CC=gcc
 LIB_DIR=../lib
 FLAGS=-L$(LIB_DIR) -lcthread -Wall
 
-all: cthread_test cyield_test csetprio_test cjoin_test sem_test quicksort
+all: cthread_test cyield_test csetprio_test cjoin_test sem_test quicksort cidentify_test
 
 cthread_test: cthread_test.o $(LIB_DIR)/libcthread.a
 	$(CC) -o teste cthread_test.o $(FLAGS)
@@ -34,5 +34,10 @@ sem_test: sem_test.o $(LIB_DIR)/libcthread.a
 sem_test.o: sem_test.c
 	$(CC) -c sem_test.c -Wall
 
+cidentify_test: cidentify_test.o $(LIB_DIR)/libcthread.a
+	$(CC) -o cidentify_test cidentify_test.o $(FLAGS)
+cidentify_test.o: cidentify_test.c
+	$(CC) -c cidentify_test.c -Wall
+
 clean:
-	rm *.o teste cyield_test csetprio_test cjoin_test quicksort sem_test
+	rm *.o teste cyield_test csetprio_test cjoin_test quicksort sem_test cidentify_test

@@ -81,21 +81,6 @@ void threat_end_of_thread() {
 	}
 }
 
-// TODO: remove
-void print_fila(PFILA2 fila) {
-	TCB_t* elem;
-	if(FirstFila2(fila) != 0) {
-		printf("TA VAZIA\n");
-		return;
-	}
-	printf("\nOLHA O PRINT DA FILA\n");
-	do {
-		elem = (TCB_t*) GetAtIteratorFila2(fila);
-		printf("Tid: %d\tPrioridade: %d\n", elem->tid, elem->prio);
-	} while(NextFila2(fila) == 0);
-	printf("ACABOU O PRINT DA FILA\n");
-}
-
 // Find the first element with highest priority and return a pointer to it.
 TCB_t* select_thread_to_run() {
 	return select_thread_by_priority_on(ready);
@@ -145,18 +130,6 @@ TCB_t* find_by_tid(PFILA2 queue, int tid) {
 
 int is_empty(PFILA2 queue) {
 	return FirstFila2(queue);
-}
-
-
-// TODO: remove
-void print_ready() {
-	print_fila(ready);
-}
-
-
-// TODO: remove
-void print_running() {
-	print_fila(running);
 }
 
 void schedule() {
